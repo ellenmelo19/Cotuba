@@ -68,6 +68,29 @@ class MainIntegrationTest {
     }
 
     @Test
+    @DisplayName("Deve usar metadados do arquivo ebook.properties ao gerar PDF")
+    void deveUsarMetadadosDoEbookProperties() throws Exception {
+        Path arquivoSaida = diretorioDosMd.resolve("saida.pdf");
+        Files.writeString(diretorioDosMd.resolve("ebook.properties"), """
+                titulo=Livro Personalizado
+                autor=Autora Teste
+                """);
+
+        int exitCode = new Main().executar(new String[]{
+                "-d", diretorioDosMd.toString(),
+                "-f", "pdf",
+                "-o", arquivoSaida.toString()
+        });
+
+        assertThat(exitCode).isEqualTo(0);
+
+        try (PdfDocument pdfDoc = new PdfDocument(new PdfReader(arquivoSaida.toFile()))) {
+            assertThat(pdfDoc.getDocumentInfo().getTitle()).isEqualTo("Livro Personalizado");
+            assertThat(pdfDoc.getDocumentInfo().getAuthor()).isEqualTo("Autora Teste");
+        }
+    }
+
+    @Test
     @DisplayName("Deve gerar o arquivo EPUB corretamente e conter o HTML renderizado")
     void deveGerarEpubComSucesso() throws Exception {
         Path arquivoSaida = diretorioDosMd.resolve("saida.epub");

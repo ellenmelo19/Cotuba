@@ -40,7 +40,12 @@ public class CotubaCli {
         commandLine = cmdParser.parse(options, args);
     }
 
-    public Path getDiretorioDosMD() {
+    public ParametrosCotuba getParametros() {
+        FormatoEbook formato = getFormato();
+        return new ParametrosCotuba(getDiretorioDosMD(), formato, getArquivoDeSaida(formato), isModoVerboso());
+    }
+
+    private Path getDiretorioDosMD() {
         String nomeDoDiretorioDosMD = commandLine.getOptionValue("dir");
 
         if (nomeDoDiretorioDosMD != null) {
@@ -54,27 +59,27 @@ public class CotubaCli {
         return Paths.get("");
     }
 
-    public String getFormato() {
+    private FormatoEbook getFormato() {
         String nomeDoFormatoDoEbook = commandLine.getOptionValue("format");
 
         if (nomeDoFormatoDoEbook != null) {
-            return nomeDoFormatoDoEbook.toLowerCase();
+            return FormatoEbook.from(nomeDoFormatoDoEbook);
         }
 
-        return "pdf";
+        return FormatoEbook.PDF;
     }
 
-    public Path getArquivoDeSaida() {
+    private Path getArquivoDeSaida(FormatoEbook formato) {
         String nomeDoArquivoDeSaidaDoEbook = commandLine.getOptionValue("output");
 
         if (nomeDoArquivoDeSaidaDoEbook != null) {
             return Paths.get(nomeDoArquivoDeSaidaDoEbook);
         }
 
-        return Paths.get("book." + getFormato());
+        return Paths.get("book." + formato.getExtensao());
     }
 
-    public boolean isModoVerboso() {
+    private boolean isModoVerboso() {
         return commandLine.hasOption("verbose");
     }
 

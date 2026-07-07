@@ -2,12 +2,6 @@ package br.com.unipds;
 
 import org.apache.commons.cli.ParseException;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -28,29 +22,21 @@ public class Main {
             return 1;
         }
 
-        boolean modoVerboso = cli.isModoVerboso();
+        ParametrosCotuba parametros;
+        try {
+            parametros = cli.getParametros();
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+            return 1;
+        }
 
         try {
-            Path diretorioDosMD = cli.getDiretorioDosMD();
-            String formato = cli.getFormato();
-            Path arquivoDeSaida = cli.getArquivoDeSaida();
-
-            limparArquivoDeSaida(arquivoDeSaida);
-
-            var renderizadorDeMarkdown = new RenderizadorDeMarkdown();
-            if ("pdf".equals(formato)) {
-                new GeradorDePdf(renderizadorDeMarkdown).gerar(diretorioDosMD, arquivoDeSaida);
-            } else if ("epub".equals(formato)) {
-                new GeradorDeEpub(renderizadorDeMarkdown).gerar(diretorioDosMD, arquivoDeSaida);
-            } else {
-                throw new IllegalArgumentException("Formato do ebook inválido: " + formato);
-            }
-
-            System.out.println("Arquivo gerado com sucesso: " + arquivoDeSaida);
+            new GeradorDeEbookService().gerar(parametros);
+            System.out.println("Arquivo gerado com sucesso: " + parametros.getArquivoDeSaida());
             return 0;
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            if (modoVerboso) {
+            if (parametros.isModoVerboso()) {
                 System.err.println();
                 ex.printStackTrace();
             }
@@ -63,16 +49,6 @@ public class Main {
             new CotubaCli(new String[]{}).imprimirAjuda();
         } catch (ParseException ignored) {
             // Não deve ocorrer sem argumentos.
-        }
-    }
-
-    private void limparArquivoDeSaida(Path arquivoDeSaida) throws IOException {
-        if (Files.isDirectory(arquivoDeSaida)) {
-            // deleta arquivos do diretório recursivamente
-            Files.walk(arquivoDeSaida).sorted(Comparator.reverseOrder())
-                    .map(Path::toFile).forEach(File::delete);
-        } else {
-            Files.deleteIfExists(arquivoDeSaida);
         }
     }
 }
