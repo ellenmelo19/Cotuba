@@ -12,43 +12,33 @@ import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.properties.AreaBreakType;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class GeradorDePdf {
 
-    private final RenderizadorDeMarkdown renderizadorDeMarkdown;
-
-    public GeradorDePdf(RenderizadorDeMarkdown renderizadorDeMarkdown) {
-        this.renderizadorDeMarkdown = renderizadorDeMarkdown;
-    }
-
-    public void gerar(Path diretorioDosMD, Path arquivoDeSaida) {
-        try (var writer = new PdfWriter(Files.newOutputStream(arquivoDeSaida));
+    public void gerar(Ebook ebook) {
+        try (var writer = new PdfWriter(Files.newOutputStream(ebook.getArquivoDeSaida()));
              var pdf = new PdfDocument(writer);
              var pdfDocument = new Document(pdf)) {
 
-            //TODO: definir título e autor para o livro
-            pdf.getDocumentInfo().setTitle("Livro");
-            pdf.getDocumentInfo().setAuthor("Autor");
+            pdf.getDocumentInfo().setTitle(ebook.getTitulo());
+            pdf.getDocumentInfo().setAuthor(ebook.getAutor());
 
-            List<CapituloHtml> capitulos = renderizadorDeMarkdown.renderizar(diretorioDosMD);
+            for (int i = 0; i < ebook.getCapitulos().size(); i++) {
+                adicionarCapitulo(pdf, pdfDocument, ebook.getCapitulos().get(i));
 
-            for (int i = 0; i < capitulos.size(); i++) {
-                adicionarCapitulo(pdf, pdfDocument, capitulos.get(i));
-
-                if (i < capitulos.size() - 1) {
+                if (i < ebook.getCapitulos().size() - 1) {
                     pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                 }
             }
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao gerar PDF: " + arquivoDeSaida.toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao gerar PDF: " + ebook.getArquivoDeSaida().toAbsolutePath(), ex);
         }
     }
 
-    private void adicionarCapitulo(PdfDocument pdf, Document pdfDocument, CapituloHtml capitulo) {
+    private void adicionarCapitulo(PdfDocument pdf, Document pdfDocument, Capitulo capitulo) {
         try {
-            List<IElement> elementos = HtmlConverter.convertToElements(capitulo.html());
+            List<IElement> elementos = HtmlConverter.convertToElements(capitulo.getConteudoHtml());
 
             if (pdf.getNumberOfPages() == 0) {
                 pdf.addNewPage();
@@ -60,14 +50,14 @@ public class GeradorDePdf {
                 rootOutline = pdf.getOutlines(false);
             }
 
-            PdfOutline chapterOutline = rootOutline.addOutline(capitulo.titulo());
+            PdfOutline chapterOutline = rootOutline.addOutline(capitulo.getTitulo());
             chapterOutline.addDestination(PdfExplicitDestination.createFit(pdf.getLastPage()));
 
             for (IElement element : elementos) {
                 pdfDocument.add((IBlockElement) element);
             }
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao adicionar capítulo do arquivo " + capitulo.arquivoMarkdown(), ex);
+            throw new IllegalStateException("Erro ao adicionar capítulo do arquivo " + capitulo.getArquivoMarkdown(), ex);
         }
     }
 }

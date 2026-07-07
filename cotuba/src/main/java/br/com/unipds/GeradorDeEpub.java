@@ -10,27 +10,19 @@ import nl.siegmann.epublib.service.MediatypeService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class GeradorDeEpub {
 
-    private final RenderizadorDeMarkdown renderizadorDeMarkdown;
-
-    public GeradorDeEpub(RenderizadorDeMarkdown renderizadorDeMarkdown) {
-        this.renderizadorDeMarkdown = renderizadorDeMarkdown;
-    }
-
-    public void gerar(Path diretorioDosMD, Path arquivoDeSaida) {
+    public void gerar(Ebook ebook) {
         try {
             var epub = new Book();
 
-            //TODO: definir título e autor para o livro
-            epub.getMetadata().addTitle("Livro");
-            epub.getMetadata().addAuthor(new Author("Autor"));
+            epub.getMetadata().addTitle(ebook.getTitulo());
+            epub.getMetadata().addAuthor(new Author(ebook.getAutor()));
 
             boolean ehPrimeiroCapitulo = true;
 
-            for (CapituloHtml capitulo : renderizadorDeMarkdown.renderizar(diretorioDosMD)) {
+            for (Capitulo capitulo : ebook.getCapitulos()) {
                 String epubHtml = """
                           <html xmlns="http://www.w3.org/1999/xhtml">
                             <head>
@@ -40,9 +32,9 @@ public class GeradorDeEpub {
                               %s
                             </body>
                           </html>
-                        """.formatted(capitulo.titulo(), capitulo.html());
+                        """.formatted(capitulo.getTitulo(), capitulo.getConteudoHtml());
                 var chapter = new Resource(epubHtml.getBytes(StandardCharsets.UTF_8), MediatypeService.XHTML);
-                epub.addSection(capitulo.titulo(), chapter);
+                epub.addSection(capitulo.getTitulo(), chapter);
 
                 if (ehPrimeiroCapitulo) {
                     epub.getGuide().addReference(new GuideReference(chapter, "text", "Start Reading"));
@@ -51,11 +43,11 @@ public class GeradorDeEpub {
             }
 
             var epubWriter = new EpubWriter();
-            epubWriter.write(epub, Files.newOutputStream(arquivoDeSaida));
+            epubWriter.write(epub, Files.newOutputStream(ebook.getArquivoDeSaida()));
         } catch (IOException ex) {
-            throw new IllegalStateException("Erro ao criar arquivo EPUB: " + arquivoDeSaida.toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao criar arquivo EPUB: " + ebook.getArquivoDeSaida().toAbsolutePath(), ex);
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao gerar EPUB: " + arquivoDeSaida.toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao gerar EPUB: " + ebook.getArquivoDeSaida().toAbsolutePath(), ex);
         }
     }
 }
