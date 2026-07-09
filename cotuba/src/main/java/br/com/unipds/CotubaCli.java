@@ -1,5 +1,6 @@
 package br.com.unipds;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -12,12 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class CotubaCli {
+@ApplicationScoped
+public class CotubaCli implements LeitorDeParametrosCli {
 
     private final Options options;
-    private final CommandLine commandLine;
 
-    public CotubaCli(String[] args) throws ParseException {
+    public CotubaCli() {
         options = new Options();
 
         var opcaoDeDiretorioDosMD = new Option("d", "dir", true,
@@ -35,17 +36,21 @@ public class CotubaCli {
         var opcaoModoVerboso = new Option("v", "verbose", false,
                 "Habilita modo verboso.");
         options.addOption(opcaoModoVerboso);
+    }
 
+    @Override
+    public ParametrosCotuba ler(String[] args) throws ParseException {
         CommandLineParser cmdParser = new DefaultParser();
-        commandLine = cmdParser.parse(options, args);
+        CommandLine commandLine = cmdParser.parse(options, args);
+        FormatoEbook formato = getFormato(commandLine);
+        return new ParametrosCotuba(
+                getDiretorioDosMD(commandLine),
+                formato,
+                getArquivoDeSaida(commandLine, formato),
+                isModoVerboso(commandLine));
     }
 
-    public ParametrosCotuba getParametros() {
-        FormatoEbook formato = getFormato();
-        return new ParametrosCotuba(getDiretorioDosMD(), formato, getArquivoDeSaida(formato), isModoVerboso());
-    }
-
-    private Path getDiretorioDosMD() {
+    private Path getDiretorioDosMD(CommandLine commandLine) {
         String nomeDoDiretorioDosMD = commandLine.getOptionValue("dir");
 
         if (nomeDoDiretorioDosMD != null) {
@@ -59,7 +64,7 @@ public class CotubaCli {
         return Paths.get("");
     }
 
-    private FormatoEbook getFormato() {
+    private FormatoEbook getFormato(CommandLine commandLine) {
         String nomeDoFormatoDoEbook = commandLine.getOptionValue("format");
 
         if (nomeDoFormatoDoEbook != null) {
@@ -69,7 +74,7 @@ public class CotubaCli {
         return FormatoEbook.PDF;
     }
 
-    private Path getArquivoDeSaida(FormatoEbook formato) {
+    private Path getArquivoDeSaida(CommandLine commandLine, FormatoEbook formato) {
         String nomeDoArquivoDeSaidaDoEbook = commandLine.getOptionValue("output");
 
         if (nomeDoArquivoDeSaidaDoEbook != null) {
@@ -79,10 +84,11 @@ public class CotubaCli {
         return Paths.get("book." + formato.getExtensao());
     }
 
-    private boolean isModoVerboso() {
+    private boolean isModoVerboso(CommandLine commandLine) {
         return commandLine.hasOption("verbose");
     }
 
+    @Override
     public void imprimirAjuda() {
         var ajuda = new HelpFormatter();
         ajuda.printHelp("cotuba", options);

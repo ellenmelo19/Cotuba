@@ -1,5 +1,7 @@
 package br.com.unipds;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -8,8 +10,10 @@ import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class CapituloRepository {
+@ApplicationScoped
+public class CapituloRepository implements RepositorioDeCapitulos {
 
+    @Override
     public List<Capitulo> buscarPorDiretorio(Path diretorioDosMD) {
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.md");
 
