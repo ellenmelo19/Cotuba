@@ -26,11 +26,11 @@ public class CotubaCli implements LeitorDeParametrosCli {
         options.addOption(opcaoDeDiretorioDosMD);
 
         var opcaoDeFormatoDoEbook = new Option("f", "format", true,
-                "Formato de saída do ebook. Pode ser: pdf ou epub. Default: pdf");
+                "Formato de saída do ebook. Pode ser: pdf, epub ou html. Default: pdf");
         options.addOption(opcaoDeFormatoDoEbook);
 
         var opcaoDeArquivoDeSaida = new Option("o", "output", true,
-                "Arquivo de saída do ebook. Default: book.{formato}.");
+                "Arquivo de saída do ebook. Default: book.pdf, book.epub ou site.");
         options.addOption(opcaoDeArquivoDeSaida);
 
         var opcaoModoVerboso = new Option("v", "verbose", false,
@@ -81,7 +81,7 @@ public class CotubaCli implements LeitorDeParametrosCli {
             return Paths.get(nomeDoArquivoDeSaidaDoEbook);
         }
 
-        return Paths.get("book." + formato.getExtensao());
+        return Paths.get(formato.getArquivoSaidaPadrao());
     }
 
     private boolean isModoVerboso(CommandLine commandLine) {

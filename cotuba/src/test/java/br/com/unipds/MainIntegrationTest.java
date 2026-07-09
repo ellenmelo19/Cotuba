@@ -25,23 +25,19 @@ class MainIntegrationTest {
 
     private Path arquivoMd;
 
-    // Utilitários para capturar o System.err nativamente
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalErr = System.err;
 
     @BeforeEach
     void setUp() throws Exception {
-        // Redireciona a saída de erro para conseguirmos validar nos testes
         System.setErr(new PrintStream(errContent));
 
-        // Cria o arquivo de teste
         arquivoMd = diretorioDosMd.resolve("01-introducao.md");
         Files.writeString(arquivoMd, "# Capítulo Teste\n\nEste é um conteúdo de um arquivo Markdown.");
     }
 
     @AfterEach
     void tearDown() {
-        // Restaura a saída padrão de erro do Java
         System.setErr(originalErr);
     }
 
@@ -116,6 +112,36 @@ class MainIntegrationTest {
     }
 
     @Test
+    @DisplayName("Deve gerar um site com index e uma página HTML por capítulo")
+    void deveGerarSiteComSucesso() throws Exception {
+        Path diretorioDeSaida = diretorioDosMd.resolve("site");
+        Files.writeString(diretorioDosMd.resolve("ebook.properties"), """
+                titulo=Livro Site
+                autor=Autora Site
+                """);
+
+        int exitCode = new Main().executar(new String[]{
+                "-d", diretorioDosMd.toString(),
+                "-f", "html",
+                "-o", diretorioDeSaida.toString()
+        });
+
+        assertThat(exitCode).isEqualTo(0);
+        assertThat(diretorioDeSaida.resolve("index.html")).exists().isRegularFile();
+        assertThat(diretorioDeSaida.resolve("capitulo-01.html")).exists().isRegularFile();
+
+        assertThat(Files.readString(diretorioDeSaida.resolve("index.html")))
+                .contains("Livro Site")
+                .contains("Autora Site")
+                .contains("capitulo-01.html")
+                .contains("Capítulo Teste");
+
+        assertThat(Files.readString(diretorioDeSaida.resolve("capitulo-01.html")))
+                .contains("<h1>Capítulo Teste</h1>")
+                .contains("<p>Este é um conteúdo de um arquivo Markdown.</p>");
+    }
+
+    @Test
     @DisplayName("Deve retornar status 1 e exibir erro caso o formato seja inválido")
     void deveFalharEEncerrarQuandoFormatoEhInvalido() {
         Path arquivoSaida = diretorioDosMd.resolve("saida.mobi");
@@ -134,7 +160,7 @@ class MainIntegrationTest {
     @Test
     @DisplayName("Deve retornar status 1 e exibir erro caso diretório não tenha arquivos .md")
     void deveFalharEEncerrarQuandoNaoHaArquivosMd() throws Exception {
-        Files.deleteIfExists(arquivoMd); // Deleta o arquivo para simular diretório vazio
+        Files.deleteIfExists(arquivoMd);
         Path arquivoSaida = diretorioDosMd.resolve("saida.pdf");
 
         int exitCode = new Main().executar(new String[]{
