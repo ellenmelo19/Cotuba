@@ -10,12 +10,17 @@ import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.properties.AreaBreakType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 
 import java.nio.file.Files;
 import java.util.List;
 
-public class GeradorDePdf {
+@ApplicationScoped
+@Named("pdf")
+public class GeradorDePdf implements GeradorDeEbook {
 
+    @Override
     public void gerar(Ebook ebook) {
         try (var writer = new PdfWriter(Files.newOutputStream(ebook.getArquivoDeSaida()));
              var pdf = new PdfDocument(writer);

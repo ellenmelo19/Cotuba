@@ -1,5 +1,7 @@
 package br.com.unipds;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -7,12 +9,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class MetadadosEbookRepository {
+@ApplicationScoped
+public class MetadadosEbookRepository implements RepositorioDeMetadadosEbook {
 
     private static final String NOME_ARQUIVO = "ebook.properties";
     private static final String TITULO_PADRAO = "Livro";
     private static final String AUTOR_PADRAO = "Autor";
 
+    @Override
     public MetadadosEbook buscarPorDiretorio(Path diretorioDoLivro) {
         Path arquivoDeMetadados = diretorioDoLivro.resolve(NOME_ARQUIVO);
 

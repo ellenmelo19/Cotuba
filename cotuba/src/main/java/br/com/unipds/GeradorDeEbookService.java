@@ -1,47 +1,43 @@
 package br.com.unipds;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
 import java.util.List;
 
+@ApplicationScoped
 public class GeradorDeEbookService {
 
-    private final CapituloRepository capituloRepository;
-    private final MetadadosEbookRepository metadadosEbookRepository;
-    private final RenderizadorDeMarkdown renderizadorDeMarkdown;
-    private final GeradorDePdf geradorDePdf;
-    private final GeradorDeEpub geradorDeEpub;
+    private final RepositorioDeCapitulos repositorioDeCapitulos;
+    private final RepositorioDeMetadadosEbook repositorioDeMetadadosEbook;
+    private final RenderizadorDeCapitulos renderizadorDeCapitulos;
+    private final PreparadorArquivoDeSaida preparadorArquivoDeSaida;
+    private final GeradorDeEbook geradorDePdf;
+    private final GeradorDeEbook geradorDeEpub;
 
-    public GeradorDeEbookService() {
-        this(new CapituloRepository(),
-                new MetadadosEbookRepository(),
-                new RenderizadorDeMarkdown(),
-                new GeradorDePdf(),
-                new GeradorDeEpub());
-    }
-
-    public GeradorDeEbookService(CapituloRepository capituloRepository,
-                                MetadadosEbookRepository metadadosEbookRepository,
-                                RenderizadorDeMarkdown renderizadorDeMarkdown,
-                                GeradorDePdf geradorDePdf,
-                                GeradorDeEpub geradorDeEpub) {
-        this.capituloRepository = capituloRepository;
-        this.metadadosEbookRepository = metadadosEbookRepository;
-        this.renderizadorDeMarkdown = renderizadorDeMarkdown;
+    @Inject
+    public GeradorDeEbookService(RepositorioDeCapitulos repositorioDeCapitulos,
+                                RepositorioDeMetadadosEbook repositorioDeMetadadosEbook,
+                                RenderizadorDeCapitulos renderizadorDeCapitulos,
+                                PreparadorArquivoDeSaida preparadorArquivoDeSaida,
+                                @Named("pdf") GeradorDeEbook geradorDePdf,
+                                @Named("epub") GeradorDeEbook geradorDeEpub) {
+        this.repositorioDeCapitulos = repositorioDeCapitulos;
+        this.repositorioDeMetadadosEbook = repositorioDeMetadadosEbook;
+        this.renderizadorDeCapitulos = renderizadorDeCapitulos;
+        this.preparadorArquivoDeSaida = preparadorArquivoDeSaida;
         this.geradorDePdf = geradorDePdf;
         this.geradorDeEpub = geradorDeEpub;
     }
 
     public void gerar(ParametrosCotuba parametros) {
-        limparArquivoDeSaida(parametros.getArquivoDeSaida());
+        preparadorArquivoDeSaida.preparar(parametros.getArquivoDeSaida());
 
-        List<Capitulo> capitulos = capituloRepository.buscarPorDiretorio(parametros.getDiretorioDosMD());
-        renderizadorDeMarkdown.renderizar(capitulos);
+        List<Capitulo> capitulos = repositorioDeCapitulos.buscarPorDiretorio(parametros.getDiretorioDosMD());
+        renderizadorDeCapitulos.renderizar(capitulos);
 
-        MetadadosEbook metadados = metadadosEbookRepository.buscarPorDiretorio(parametros.getDiretorioDosMD());
+        MetadadosEbook metadados = repositorioDeMetadadosEbook.buscarPorDiretorio(parametros.getDiretorioDosMD());
         var ebook = new Ebook(
                 parametros.getFormato(),
                 parametros.getArquivoDeSaida(),
@@ -55,20 +51,6 @@ public class GeradorDeEbookService {
             geradorDeEpub.gerar(ebook);
         } else {
             throw new IllegalArgumentException("Formato do ebook inválido: " + ebook.getFormato());
-        }
-    }
-
-    private void limparArquivoDeSaida(Path arquivoDeSaida) {
-        try {
-            if (Files.isDirectory(arquivoDeSaida)) {
-                // deleta arquivos do diretório recursivamente
-                Files.walk(arquivoDeSaida).sorted(Comparator.reverseOrder())
-                        .map(Path::toFile).forEach(File::delete);
-            } else {
-                Files.deleteIfExists(arquivoDeSaida);
-            }
-        } catch (IOException ex) {
-            throw new IllegalStateException("Erro ao limpar arquivo de saída: " + arquivoDeSaida.toAbsolutePath(), ex);
         }
     }
 }

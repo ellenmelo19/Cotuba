@@ -1,5 +1,6 @@
 package br.com.unipds;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.Heading;
 import org.commonmark.node.Node;
@@ -9,14 +10,17 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.util.List;
 
-public class RenderizadorDeMarkdown {
+@ApplicationScoped
+public class RenderizadorDeMarkdown implements RenderizadorDeCapitulos {
 
+    @Override
     public void renderizar(List<Capitulo> capitulos) {
         for (Capitulo capitulo : capitulos) {
             renderizar(capitulo);
         }
     }
 
+    @Override
     public void renderizar(Capitulo capitulo) {
         Node document = parsearMarkdown(capitulo);
 

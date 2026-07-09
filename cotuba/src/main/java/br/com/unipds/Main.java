@@ -1,5 +1,7 @@
 package br.com.unipds;
 
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 import org.apache.commons.cli.ParseException;
 
 public class Main {
@@ -12,43 +14,39 @@ public class Main {
     }
 
     int executar(String[] args) {
-        CotubaCli cli;
+        try (SeContainer container = SeContainerInitializer.newInstance().initialize()) {
+            LeitorDeParametrosCli leitorCli = container.select(LeitorDeParametrosCli.class).get();
+            ParametrosCotuba parametros = lerParametros(args, leitorCli);
 
-        try {
-            cli = new CotubaCli(args);
-        } catch (ParseException e) {
-            System.err.println(e.getMessage());
-            imprimirAjuda();
-            return 1;
-        }
-
-        ParametrosCotuba parametros;
-        try {
-            parametros = cli.getParametros();
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            return 1;
-        }
-
-        try {
-            new GeradorDeEbookService().gerar(parametros);
-            System.out.println("Arquivo gerado com sucesso: " + parametros.getArquivoDeSaida());
-            return 0;
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            if (parametros.isModoVerboso()) {
-                System.err.println();
-                ex.printStackTrace();
+            if (parametros == null) {
+                return 1;
             }
-            return 1;
+
+            try {
+                container.select(GeradorDeEbookService.class).get().gerar(parametros);
+                System.out.println("Arquivo gerado com sucesso: " + parametros.getArquivoDeSaida());
+                return 0;
+            } catch (Exception ex) {
+                System.err.println(ex.getMessage());
+                if (parametros.isModoVerboso()) {
+                    System.err.println();
+                    ex.printStackTrace();
+                }
+                return 1;
+            }
         }
     }
 
-    private void imprimirAjuda() {
+    private ParametrosCotuba lerParametros(String[] args, LeitorDeParametrosCli leitorCli) {
         try {
-            new CotubaCli(new String[]{}).imprimirAjuda();
-        } catch (ParseException ignored) {
-            // Não deve ocorrer sem argumentos.
+            return leitorCli.ler(args);
+        } catch (ParseException e) {
+            System.err.println(e.getMessage());
+            leitorCli.imprimirAjuda();
+            return null;
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+            return null;
         }
     }
 }
