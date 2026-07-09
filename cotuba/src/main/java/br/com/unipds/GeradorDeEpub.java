@@ -1,7 +1,6 @@
 package br.com.unipds;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.GuideReference;
@@ -14,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 @ApplicationScoped
-@Named("epub")
+@FormatoGerador(FormatoEbook.EPUB)
 public class GeradorDeEpub implements GeradorDeEbook {
 
     @Override

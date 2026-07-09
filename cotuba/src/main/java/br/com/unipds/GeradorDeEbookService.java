@@ -1,8 +1,9 @@
 package br.com.unipds;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 import java.util.List;
 
@@ -13,22 +14,19 @@ public class GeradorDeEbookService {
     private final RepositorioDeMetadadosEbook repositorioDeMetadadosEbook;
     private final RenderizadorDeCapitulos renderizadorDeCapitulos;
     private final PreparadorArquivoDeSaida preparadorArquivoDeSaida;
-    private final GeradorDeEbook geradorDePdf;
-    private final GeradorDeEbook geradorDeEpub;
+    private final Instance<GeradorDeEbook> geradoresDeEbook;
 
     @Inject
     public GeradorDeEbookService(RepositorioDeCapitulos repositorioDeCapitulos,
                                 RepositorioDeMetadadosEbook repositorioDeMetadadosEbook,
                                 RenderizadorDeCapitulos renderizadorDeCapitulos,
                                 PreparadorArquivoDeSaida preparadorArquivoDeSaida,
-                                @Named("pdf") GeradorDeEbook geradorDePdf,
-                                @Named("epub") GeradorDeEbook geradorDeEpub) {
+                                @Any Instance<GeradorDeEbook> geradoresDeEbook) {
         this.repositorioDeCapitulos = repositorioDeCapitulos;
         this.repositorioDeMetadadosEbook = repositorioDeMetadadosEbook;
         this.renderizadorDeCapitulos = renderizadorDeCapitulos;
         this.preparadorArquivoDeSaida = preparadorArquivoDeSaida;
-        this.geradorDePdf = geradorDePdf;
-        this.geradorDeEpub = geradorDeEpub;
+        this.geradoresDeEbook = geradoresDeEbook;
     }
 
     public void gerar(ParametrosCotuba parametros) {
@@ -45,12 +43,9 @@ public class GeradorDeEbookService {
                 metadados.getTitulo(),
                 metadados.getAutor());
 
-        if (FormatoEbook.PDF.equals(ebook.getFormato())) {
-            geradorDePdf.gerar(ebook);
-        } else if (FormatoEbook.EPUB.equals(ebook.getFormato())) {
-            geradorDeEpub.gerar(ebook);
-        } else {
-            throw new IllegalArgumentException("Formato do ebook inválido: " + ebook.getFormato());
-        }
+        geradoresDeEbook
+                .select(new FormatoGeradorFilter(ebook.getFormato()))
+                .get()
+                .gerar(ebook);
     }
 }

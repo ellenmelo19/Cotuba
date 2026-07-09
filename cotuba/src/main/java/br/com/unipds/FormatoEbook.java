@@ -2,17 +2,24 @@ package br.com.unipds;
 
 public enum FormatoEbook {
 
-    PDF("pdf"),
-    EPUB("epub");
+    PDF("pdf", "book.pdf"),
+    EPUB("epub", "book.epub"),
+    HTML("html", "site");
 
     private final String extensao;
+    private final String arquivoSaidaPadrao;
 
-    FormatoEbook(String extensao) {
+    FormatoEbook(String extensao, String arquivoSaidaPadrao) {
         this.extensao = extensao;
+        this.arquivoSaidaPadrao = arquivoSaidaPadrao;
     }
 
     public String getExtensao() {
         return extensao;
+    }
+
+    public String getArquivoSaidaPadrao() {
+        return arquivoSaidaPadrao;
     }
 
     public static FormatoEbook from(String valor) {

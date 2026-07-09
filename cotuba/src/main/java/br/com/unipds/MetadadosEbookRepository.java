@@ -3,7 +3,7 @@ package br.com.unipds;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +25,7 @@ public class MetadadosEbookRepository implements RepositorioDeMetadadosEbook {
         }
 
         var properties = new Properties();
-        try (Reader reader = Files.newBufferedReader(arquivoDeMetadados, StandardCharsets.UTF_8)) {
+        try (StringReader reader = new StringReader(removerBom(Files.readString(arquivoDeMetadados, StandardCharsets.UTF_8)))) {
             properties.load(reader);
         } catch (IOException ex) {
             throw new IllegalStateException("Erro ao ler metadados do ebook em " + arquivoDeMetadados.toAbsolutePath(), ex);
@@ -34,5 +34,13 @@ public class MetadadosEbookRepository implements RepositorioDeMetadadosEbook {
         String titulo = properties.getProperty("titulo", properties.getProperty("title", TITULO_PADRAO));
         String autor = properties.getProperty("autor", properties.getProperty("author", AUTOR_PADRAO));
         return new MetadadosEbook(titulo, autor);
+    }
+
+    private String removerBom(String conteudo) {
+        if (conteudo.startsWith("\uFEFF")) {
+            return conteudo.substring(1);
+        }
+
+        return conteudo;
     }
 }
