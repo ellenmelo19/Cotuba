@@ -14,32 +14,35 @@ import java.util.List;
 public class RenderizadorDeMarkdown implements RenderizadorDeCapitulos {
 
     @Override
-    public void renderizar(List<Capitulo> capitulos) {
-        for (Capitulo capitulo : capitulos) {
-            renderizar(capitulo);
-        }
+    public List<Capitulo> renderizar(List<CapituloEmMarkdown> capitulosEmMarkdown) {
+        return capitulosEmMarkdown.stream()
+                .map(this::renderizar)
+                .toList();
     }
 
     @Override
-    public void renderizar(Capitulo capitulo) {
-        Node document = parsearMarkdown(capitulo);
+    public Capitulo renderizar(CapituloEmMarkdown capituloEmMarkdown) {
+        Node document = parsearMarkdown(capituloEmMarkdown);
 
         try {
             HtmlRenderer renderer = HtmlRenderer.builder().build();
-            capitulo.setTitulo(encontrarTitulo(document));
-            capitulo.setConteudoHtml(renderer.render(document));
+            String titulo = encontrarTitulo(document);
+            String conteudoHtml = renderer.render(document);
+            return new Capitulo(titulo, conteudoHtml, capituloEmMarkdown.arquivoMarkdown());
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + capitulo.getArquivoMarkdown(), ex);
+            throw new IllegalStateException(
+                    "Erro ao renderizar para HTML o arquivo " + capituloEmMarkdown.arquivoMarkdown(), ex);
         }
     }
 
-    private Node parsearMarkdown(Capitulo capitulo) {
+    private Node parsearMarkdown(CapituloEmMarkdown capituloEmMarkdown) {
         Parser parser = Parser.builder().build();
 
         try {
-            return parser.parse(capitulo.getConteudoMarkdown());
+            return parser.parse(capituloEmMarkdown.conteudoMarkdown());
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao fazer parse do arquivo " + capitulo.getArquivoMarkdown(), ex);
+            throw new IllegalStateException(
+                    "Erro ao fazer parse do arquivo " + capituloEmMarkdown.arquivoMarkdown(), ex);
         }
     }
 

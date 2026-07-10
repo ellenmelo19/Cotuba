@@ -32,16 +32,19 @@ public class GeradorDeEbookService {
     public void gerar(ParametrosCotuba parametros) {
         preparadorArquivoDeSaida.preparar(parametros.getArquivoDeSaida());
 
-        List<Capitulo> capitulos = repositorioDeCapitulos.buscarPorDiretorio(parametros.getDiretorioDosMD());
-        renderizadorDeCapitulos.renderizar(capitulos);
+        List<CapituloEmMarkdown> capitulosEmMarkdown =
+                repositorioDeCapitulos.buscarPorDiretorio(parametros.getDiretorioDosMD());
+        List<Capitulo> capitulos = renderizadorDeCapitulos.renderizar(capitulosEmMarkdown);
 
         MetadadosEbook metadados = repositorioDeMetadadosEbook.buscarPorDiretorio(parametros.getDiretorioDosMD());
-        var ebook = new Ebook(
-                parametros.getFormato(),
-                parametros.getArquivoDeSaida(),
-                capitulos,
-                metadados.getTitulo(),
-                metadados.getAutor());
+
+        Ebook ebook = Ebook.builder()
+                .comFormato(parametros.getFormato())
+                .comArquivoDeSaida(parametros.getArquivoDeSaida())
+                .comCapitulos(capitulos)
+                .comTitulo(metadados.getTitulo())
+                .comAutor(metadados.getAutor())
+                .build();
 
         geradoresDeEbook
                 .select(new FormatoGeradorFilter(ebook.getFormato()))

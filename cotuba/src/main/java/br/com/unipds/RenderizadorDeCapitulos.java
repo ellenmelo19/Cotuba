@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface RenderizadorDeCapitulos {
 
-    void renderizar(List<Capitulo> capitulos);
+    List<Capitulo> renderizar(List<CapituloEmMarkdown> capitulosEmMarkdown);
 
-    void renderizar(Capitulo capitulo);
+    Capitulo renderizar(CapituloEmMarkdown capituloEmMarkdown);
 }

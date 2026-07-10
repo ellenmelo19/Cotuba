@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface RepositorioDeCapitulos {
 
-    List<Capitulo> buscarPorDiretorio(Path diretorioDosMD);
+    List<CapituloEmMarkdown> buscarPorDiretorio(Path diretorioDosMD);
 }
