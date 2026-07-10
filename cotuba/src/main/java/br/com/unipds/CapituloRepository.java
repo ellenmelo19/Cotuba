@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public class CapituloRepository implements RepositorioDeCapitulos {
 
     @Override
-    public List<Capitulo> buscarPorDiretorio(Path diretorioDosMD) {
+    public List<CapituloEmMarkdown> buscarPorDiretorio(Path diretorioDosMD) {
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.md");
 
         try (Stream<Path> streamMDs = Files.list(diretorioDosMD)) {
@@ -29,17 +29,17 @@ public class CapituloRepository implements RepositorioDeCapitulos {
             }
 
             return arquivosMD.stream()
-                    .map(this::criarCapitulo)
+                    .map(this::lerCapituloEmMarkdown)
                     .toList();
         } catch (IOException ex) {
             throw new IllegalStateException("Erro tentando encontrar arquivos .md em " + diretorioDosMD.toAbsolutePath(), ex);
         }
     }
 
-    private Capitulo criarCapitulo(Path arquivoMD) {
+    private CapituloEmMarkdown lerCapituloEmMarkdown(Path arquivoMD) {
         try {
             String conteudoMarkdown = removerBom(Files.readString(arquivoMD));
-            return new Capitulo("Capítulo", conteudoMarkdown, arquivoMD, null);
+            return new CapituloEmMarkdown(arquivoMD, conteudoMarkdown);
         } catch (IOException ex) {
             throw new IllegalStateException("Erro ao ler arquivo markdown " + arquivoMD, ex);
         }
