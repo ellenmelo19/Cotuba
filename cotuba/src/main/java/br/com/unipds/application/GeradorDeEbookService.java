@@ -4,7 +4,6 @@ import br.com.unipds.domain.Capitulo;
 import br.com.unipds.domain.CapituloEmMarkdown;
 import br.com.unipds.domain.Ebook;
 import br.com.unipds.domain.MetadadosEbook;
-import br.com.unipds.application.ParametrosCotuba;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -12,6 +11,7 @@ import jakarta.inject.Inject;
 import org.jmolecules.ddd.annotation.Service;
 
 import java.util.List;
+import java.util.ServiceLoader;
 
 @ApplicationScoped
 @Service
@@ -57,5 +57,9 @@ public class GeradorDeEbookService {
                 .select(new FormatoGeradorFilter(ebook.getFormato()))
                 .get()
                 .gerar(ebook);
+
+        for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
+            plugin.aposGeracao(ebook);
+        }
     }
 }
