@@ -1,6 +1,6 @@
 package br.com.unipds.adapters;
 
-import br.com.unipds.application.Plugin;
+import br.com.unipds.application.PluginAposRenderizacao;
 import br.com.unipds.application.RenderizadorDeCapitulos;
 import br.com.unipds.domain.Capitulo;
 import br.com.unipds.domain.CapituloEmMarkdown;
@@ -35,7 +35,7 @@ public class RenderizadorDeMarkdown implements RenderizadorDeCapitulos {
             String html = renderer.render(document);
 
             // Capítulos são imutáveis: o HTML processado pelos plugins entra na criação do objeto
-            for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
+            for (PluginAposRenderizacao plugin : ServiceLoader.load(PluginAposRenderizacao.class)) {
                 html = plugin.aposRenderizacao(html);
             }
 

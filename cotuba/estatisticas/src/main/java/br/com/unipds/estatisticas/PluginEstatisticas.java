@@ -1,6 +1,6 @@
 package br.com.unipds.estatisticas;
 
-import br.com.unipds.application.Plugin;
+import br.com.unipds.application.PluginAposGeracao;
 import br.com.unipds.domain.Capitulo;
 import br.com.unipds.domain.Ebook;
 
@@ -9,14 +9,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class PluginEstatisticas implements Plugin {
+public class PluginEstatisticas implements PluginAposGeracao {
 
     private static final int TOP_PALAVRAS = 15;
-
-    @Override
-    public String aposRenderizacao(String html) {
-        return html;
-    }
 
     @Override
     public void aposGeracao(Ebook ebook) {
@@ -37,9 +32,6 @@ public class PluginEstatisticas implements Plugin {
             }
         }
 
-        // Composição: contador.put(...) nem compila mais — encapsulamento preservado.
-        // contador.put("java", -10); // erro de compilação
-
         System.out.println("=== Estatisticas do ebook ===");
         System.out.println("Titulo: " + ebook.getTitulo());
         System.out.println("Autor: " + ebook.getAutor());
@@ -48,7 +40,6 @@ public class PluginEstatisticas implements Plugin {
         System.out.println("Caracteres: " + totalCaracteres);
         System.out.println("Top " + TOP_PALAVRAS + " palavras mais frequentes:");
 
-        // Iterable: for-each sem expor o TreeMap interno
         List<Map.Entry<String, Integer>> entradas = new ArrayList<>();
         for (Map.Entry<String, Integer> entrada : contador) {
             entradas.add(entrada);
