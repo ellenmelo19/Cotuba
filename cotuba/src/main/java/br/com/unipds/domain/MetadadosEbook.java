@@ -1,5 +1,8 @@
-package br.com.unipds;
+package br.com.unipds.domain;
 
+import org.jmolecules.ddd.annotation.ValueObject;
+
+@ValueObject
 public class MetadadosEbook {
 
     private String titulo;

@@ -1,5 +1,6 @@
-package br.com.unipds;
+package br.com.unipds.application;
 
+import br.com.unipds.domain.FormatoEbook;
 import jakarta.enterprise.util.AnnotationLiteral;
 
 public class FormatoGeradorFilter extends AnnotationLiteral<FormatoGerador> implements FormatoGerador {

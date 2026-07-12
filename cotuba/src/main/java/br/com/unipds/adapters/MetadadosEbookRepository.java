@@ -1,6 +1,9 @@
-package br.com.unipds;
+package br.com.unipds.adapters;
 
+import br.com.unipds.application.RepositorioDeMetadadosEbook;
+import br.com.unipds.domain.MetadadosEbook;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.jmolecules.ddd.annotation.Repository;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -10,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 @ApplicationScoped
+@Repository
 public class MetadadosEbookRepository implements RepositorioDeMetadadosEbook {
 
     private static final String NOME_ARQUIVO = "ebook.properties";

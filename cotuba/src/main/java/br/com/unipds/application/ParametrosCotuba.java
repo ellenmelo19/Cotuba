@@ -1,5 +1,6 @@
-package br.com.unipds;
+package br.com.unipds.application;
 
+import br.com.unipds.domain.FormatoEbook;
 import java.nio.file.Path;
 
 public class ParametrosCotuba {

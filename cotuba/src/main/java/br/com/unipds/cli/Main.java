@@ -1,5 +1,7 @@
-package br.com.unipds;
+package br.com.unipds.cli;
 
+import br.com.unipds.application.GeradorDeEbookService;
+import br.com.unipds.application.ParametrosCotuba;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import org.apache.commons.cli.ParseException;
@@ -13,7 +15,7 @@ public class Main {
         }
     }
 
-    int executar(String[] args) {
+    public int executar(String[] args) {
         try (SeContainer container = SeContainerInitializer.newInstance().initialize()) {
             LeitorDeParametrosCli leitorCli = container.select(LeitorDeParametrosCli.class).get();
             ParametrosCotuba parametros = lerParametros(args, leitorCli);

@@ -1,5 +1,7 @@
-package br.com.unipds;
+package br.com.unipds.application;
 
+import br.com.unipds.domain.Capitulo;
+import br.com.unipds.domain.CapituloEmMarkdown;
 import java.util.List;
 
 public interface RenderizadorDeCapitulos {

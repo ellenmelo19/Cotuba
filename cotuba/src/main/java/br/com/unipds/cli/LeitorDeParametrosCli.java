@@ -1,5 +1,6 @@
-package br.com.unipds;
+package br.com.unipds.cli;
 
+import br.com.unipds.application.ParametrosCotuba;
 import org.apache.commons.cli.ParseException;
 
 public interface LeitorDeParametrosCli {
