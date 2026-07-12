@@ -58,7 +58,7 @@ public class GeradorDeEbookService {
                 .get()
                 .gerar(ebook);
 
-        for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
+        for (PluginAposGeracao plugin : ServiceLoader.load(PluginAposGeracao.class)) {
             plugin.aposGeracao(ebook);
         }
     }
