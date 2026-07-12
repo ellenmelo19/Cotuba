@@ -1,5 +1,6 @@
 package br.com.unipds.adapters;
 
+import br.com.unipds.application.Plugin;
 import br.com.unipds.application.RenderizadorDeCapitulos;
 import br.com.unipds.domain.Capitulo;
 import br.com.unipds.domain.CapituloEmMarkdown;
@@ -12,6 +13,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.util.List;
+import java.util.ServiceLoader;
 
 @ApplicationScoped
 public class RenderizadorDeMarkdown implements RenderizadorDeCapitulos {
@@ -30,8 +32,14 @@ public class RenderizadorDeMarkdown implements RenderizadorDeCapitulos {
         try {
             HtmlRenderer renderer = HtmlRenderer.builder().build();
             String titulo = encontrarTitulo(document);
-            String conteudoHtml = renderer.render(document);
-            return new Capitulo(titulo, conteudoHtml, capituloEmMarkdown.arquivoMarkdown());
+            String html = renderer.render(document);
+
+            // Capítulos são imutáveis: o HTML processado pelos plugins entra na criação do objeto
+            for (Plugin plugin : ServiceLoader.load(Plugin.class)) {
+                html = plugin.aposRenderizacao(html);
+            }
+
+            return new Capitulo(titulo, html, capituloEmMarkdown.arquivoMarkdown());
         } catch (Exception ex) {
             throw new IllegalStateException(
                     "Erro ao renderizar para HTML o arquivo " + capituloEmMarkdown.arquivoMarkdown(), ex);

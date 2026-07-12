@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.unipds.plugins</groupId>
+    <artifactId>tema-css</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+          Compile apenas: em runtime o Cotuba está no classpath via -cp.
+          Não embutimos o Cotuba no JAR do plugin (evita classes duplicadas no SPI).
+        -->
+        <dependency>
+            <groupId>br.com.unipds</groupId>
+            <artifactId>cotuba</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../target/original-cotuba-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+</project>
