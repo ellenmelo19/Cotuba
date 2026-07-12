@@ -1,6 +1,9 @@
-package br.com.unipds;
+package br.com.unipds.adapters;
 
+import br.com.unipds.application.RepositorioDeCapitulos;
+import br.com.unipds.domain.CapituloEmMarkdown;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.jmolecules.ddd.annotation.Repository;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @ApplicationScoped
+@Repository
 public class CapituloRepository implements RepositorioDeCapitulos {
 
     @Override

@@ -1,5 +1,7 @@
-package br.com.unipds;
+package br.com.unipds.cli;
 
+import br.com.unipds.application.ParametrosCotuba;
+import br.com.unipds.domain.FormatoEbook;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

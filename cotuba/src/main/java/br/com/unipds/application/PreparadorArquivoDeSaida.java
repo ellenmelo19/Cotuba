@@ -1,4 +1,4 @@
-package br.com.unipds;
+package br.com.unipds.application;
 
 import java.nio.file.Path;
 

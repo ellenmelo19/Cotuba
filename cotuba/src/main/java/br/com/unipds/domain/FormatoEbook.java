@@ -1,5 +1,8 @@
-package br.com.unipds;
+package br.com.unipds.domain;
 
+import org.jmolecules.ddd.annotation.ValueObject;
+
+@ValueObject
 public enum FormatoEbook {
 
     PDF("pdf", "book.pdf"),

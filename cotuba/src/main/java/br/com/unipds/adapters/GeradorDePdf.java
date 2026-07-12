@@ -1,5 +1,10 @@
-package br.com.unipds;
+package br.com.unipds.adapters;
 
+import br.com.unipds.application.GeradorDeEbook;
+import br.com.unipds.application.FormatoGerador;
+import br.com.unipds.domain.Capitulo;
+import br.com.unipds.domain.FormatoEbook;
+import br.com.unipds.domain.Ebook;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfOutline;

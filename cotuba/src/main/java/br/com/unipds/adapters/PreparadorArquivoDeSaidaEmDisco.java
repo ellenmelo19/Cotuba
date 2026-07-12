@@ -1,5 +1,6 @@
-package br.com.unipds;
+package br.com.unipds.adapters;
 
+import br.com.unipds.application.PreparadorArquivoDeSaida;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.File;

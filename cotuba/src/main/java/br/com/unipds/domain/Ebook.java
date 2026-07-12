@@ -1,15 +1,20 @@
-package br.com.unipds;
+package br.com.unipds.domain;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+import org.jmolecules.ddd.annotation.AggregateRoot;
+import org.jmolecules.ddd.annotation.Identity;
+
 /**
  * Aggregate Root do ebook. Imutável: só existe quando todas as peças estão prontas.
  */
+@AggregateRoot
 public final class Ebook {
 
     private final FormatoEbook formato;
+    @Identity
     private final Path arquivoDeSaida;
     private final List<Capitulo> capitulos;
     private final String titulo;

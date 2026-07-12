@@ -1,5 +1,8 @@
-package br.com.unipds;
+package br.com.unipds.adapters;
 
+import br.com.unipds.application.RenderizadorDeCapitulos;
+import br.com.unipds.domain.Capitulo;
+import br.com.unipds.domain.CapituloEmMarkdown;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.Heading;
