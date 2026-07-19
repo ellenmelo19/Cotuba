@@ -75,3 +75,80 @@ Você pode usar a flag `-o` para definir o nome exato e o caminho do arquivo ger
 ```bash
 java -jar cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar -d ../apostila-design -o apostila-design.pdf
 ```
+
+---
+
+## Cotubify — Arquitetura e resiliência
+
+O motor Cotuba alimenta a plataforma **Cotubify**. Decisões de arquitetura da plataforma:
+
+- [ADR 001 — Geração assíncrona de e-books via fila de mensagens](adr/adr-001-geracao-assincrona.md)
+- [ADR 002 — Cache em memória para o catálogo “Top 100”](adr/adr-002-cache-catalogo.md)
+- [ADR 003 — Resiliência de pagamentos (Circuit Breaker, fila e Idempotent Receiver)](adr/adr-003-resiliencia-pagamentos.md)
+
+Documentação C4 completa: [arquitetura/README.md](arquitetura/README.md).
+
+## Fluxo de Resiliência de Pagamento
+
+Unhappy path: o leitor clica várias vezes em “Comprar” enquanto o Gateway de Pagamento está fora do ar. A API permanece responsiva (pedido assíncrono + idempotência); o worker isola a falha com timeout e Circuit Breaker; apenas **uma** cobrança efetiva ocorre quando o parceiro volta.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Leitor
+    participant FE as Frontend
+    participant API as API Principal
+    participant DB as Banco Relacional
+    participant Q as Fila Pagamentos
+    participant W as Payment Worker
+    participant CB as Circuit Breaker
+    participant GW as Gateway Pagamento
+
+    Note over GW: Gateway FORA DO AR / extremamente lento
+
+    Leitor->>FE: Clica "Comprar" (1ª vez)
+    FE->>API: POST /compras<br/>Idempotency-Key: K1
+    API->>DB: Upsert pedido PENDENTE_PAGAMENTO (unique K1)
+    API->>Q: Publica comando CobrarPedido(pedidoId, K1)
+    API-->>FE: 202 Accepted — pagamento em processamento
+    FE-->>Leitor: "Pedido recebido. Processando pagamento…"
+
+    Leitor->>FE: Clica "Comprar" de novo (ansioso)
+    FE->>API: POST /compras<br/>Idempotency-Key: K1
+    API->>DB: Busca pedido existente por K1
+    Note over API,DB: Idempotent Receiver:<br/>já existe pedido para K1
+    API-->>FE: 202 Accepted — mesmo pedidoId<br/>(não republica cobrança)
+    FE-->>Leitor: Mesmo status (sem nova cobrança)
+
+    Leitor->>FE: Clica "Comprar" outra vez
+    FE->>API: POST /compras<br/>Idempotency-Key: K1
+    API->>DB: Reconhece K1
+    API-->>FE: 202 Accepted — mesmo pedidoId
+
+    Q->>W: Entrega CobrarPedido(pedidoId, K1)
+    W->>DB: Já está PAGO? (não)
+    W->>CB: Chamar gateway (timeout 3s)
+    CB->>GW: Autorizar cobrança
+    GW-->>CB: Timeout / erro de rede
+    CB-->>W: Falha (conta para o circuito)
+    W-->>Q: Nack / retry com backoff
+
+    Q->>W: Reentrega CobrarPedido
+    W->>CB: Chamar gateway
+    Note over CB: Limite de falhas atingido → circuito ABERTO
+    CB-->>W: Fail-fast (nem chama o GW)
+    Note over API: Threads da API livres<br/>catálogo e outras compras OK
+
+    Note over GW: Gateway se recupera
+    Note over CB: Half-open → permite uma sonda
+
+    Q->>W: Reentrega CobrarPedido(pedidoId, K1)
+    W->>DB: Ainda não PAGO (idempotência no worker)
+    W->>CB: Chamar gateway
+    CB->>GW: Autorizar cobrança
+    GW-->>CB: 200 Aprovado (1ª cobrança efetiva)
+    CB-->>W: Sucesso (circuito → closed)
+    W->>DB: Marca pedido PAGO (única cobrança)
+    W-->>FE: Evento/notificação (via API)
+    FE-->>Leitor: "Pagamento confirmado — download liberado"
+```
