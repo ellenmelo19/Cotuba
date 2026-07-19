@@ -8,24 +8,37 @@
     <artifactId>estatisticas</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <name>Plugin Estatísticas</name>
+    <description>Plugin SPI do Cotuba (projeto separado, não é módulo do reactor)</description>
+
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
         <!--
-          Compile apenas: em runtime o Cotuba está no classpath via -cp.
+          Compile apenas: em runtime o Cotuba está no module-path/classpath da app.
           Não embutimos o Cotuba no JAR do plugin (evita classes duplicadas no SPI).
         -->
         <dependency>
             <groupId>br.com.unipds</groupId>
-            <artifactId>cotuba</artifactId>
+            <artifactId>cotuba-application</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../target/original-cotuba-1.0-SNAPSHOT.jar</systemPath>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
