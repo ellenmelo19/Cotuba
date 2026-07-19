@@ -26,7 +26,7 @@ cd cotuba/
 mvn clean package
 ```
 
-Isso irá compilar o código e gerar um arquivo `.jar` dentro da pasta `target/` (ex: `cotuba-1.0-SNAPSHOT.jar`).
+Isso irá compilar os módulos Maven e gerar o executável (*fat JAR*) em `cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar`.
 
 ---
 
@@ -55,23 +55,23 @@ Os arquivos Markdown são processados em ordem alfabética e convertidos em cap�
 Se você apontar apenas o diretório, o Cotuba vai ler os arquivos Markdown e gerar um arquivo chamado `book.pdf` no diretório atual.
 
 ```bash
-java -jar target/cotuba-1.0-SNAPSHOT.jar -d ../apostila-design
+java -jar cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar -d ../apostila-design
 ```
 *Equivalente a rodar explicitamente com a flag de formato:*
 ```bash
-java -jar target/cotuba-1.0-SNAPSHOT.jar -d ../apostila-design -f pdf
+java -jar cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar -d ../apostila-design -f pdf
 ```
 
 **2. Gerar um EPUB**
 Para alterar o formato de saída para EPUB, utilize a flag `-f epub`. Isso irá gerar um arquivo `book.epub`.
 
 ```bash
-java -jar target/cotuba-1.0-SNAPSHOT.jar -d ../apostila-design -f epub
+java -jar cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar -d ../apostila-design -f epub
 ```
 
 **3. Customizar o nome do arquivo de saída**
 Você pode usar a flag `-o` para definir o nome exato e o caminho do arquivo gerado.
 
 ```bash
-java -jar target/cotuba-1.0-SNAPSHOT.jar -d ../apostila-design -o apostila-design.pdf
+java -jar cotuba-cli/target/cotuba-cli-1.0-SNAPSHOT.jar -d ../apostila-design -o apostila-design.pdf
 ```
